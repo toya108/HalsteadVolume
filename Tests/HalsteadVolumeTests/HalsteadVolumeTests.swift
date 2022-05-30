@@ -3,6 +3,6 @@ import XCTest
 
 final class HalsteadVolumeTests: XCTestCase {
     func testExample() throws {
-        run()
+        measureHalsteadVolume()
     }
 }

@@ -2,52 +2,7 @@ import Accelerate
 import SwiftSyntax
 import SwiftSyntaxParser
 
-
 let source = """
-import Foundation
-
-struct BlackjackCard {
-  // nested Suit enumeration
-  enum Suit: Character {
-    case spades = "♠"
-    case hearts = "♡"
-    case diamonds = "♢"
-    case clubs = "♣"
-  }
-
-  // nested Rank enumeration
-  enum Rank: Int {
-    case two = 2
-    case three, four, five, six, seven, eight, nine, ten
-    case jack, queen, king, ace
-
-    struct Values {
-      let first: Int, second: Int?
-    }
-
-    var values: Values {
-      switch self {
-      case .ace:
-        return Values(first: 1, second: 11)
-      case .jack, .queen, .king:
-        return Values(first: 10, second: nil)
-      default:
-        return Values(first: self.rawValue, second: nil)
-      }
-    }
-  }
-
-  // BlackjackCard properties and methods
-  let rank: Rank, suit: Suit
-  var description: String {
-    var output = "suit is"
-    output += " value is"
-    if let second = rank.values.second {
-      output += " or"
-    }
-    return output
-  }
-}
 
 """
 
@@ -62,12 +17,20 @@ private class OperatorUsageWhitespaceVisitor: SyntaxVisitor {
         Set(operands)
     }
 
+    var cyclomaticComplecity = 1
+
     override func visit(_ node: TokenSyntax) -> SyntaxVisitorContinueKind {
         switch node.tokenKind {
             case .spacedBinaryOperator:
                 operators.append(node.text)
             case .unspacedBinaryOperator:
                 operators.append(node.text)
+            case .ifKeyword, .switchKeyword, .forKeyword, .whileKeyword, .guardKeyword, .caseKeyword, .repeatKeyword:
+                cyclomaticComplecity += 1
+            case .identifier(let identifier):
+                if identifier == "forEach" {
+                    cyclomaticComplecity += 1
+                }
             default:
                 operands.append(node.text)
         }
@@ -104,14 +67,23 @@ struct HalseadVolumeCalculatar {
     }
 }
 
-func run() {
+func measureHalsteadVolume() {
     do {
         let sourceFile = try SyntaxParser.parse(source: source)
         let visitor = OperatorUsageWhitespaceVisitor()
         visitor.walk(sourceFile)
-        print(visitor.calcHalsteadVolume())
+        let halsteadVolume = visitor.calcHalsteadVolume()
+        print("halstead volume \(halsteadVolume)")
+        let cyclomaticComplexity = visitor.cyclomaticComplecity
+        print("cyclomatic complecity \(cyclomaticComplexity)")
+        let lineOfCode = source.split(separator: "\n").count
+        print("line of code \(lineOfCode)")
+        let halstead = 5.2 * log(Double(halsteadVolume))
+        let cyclomatic = 0.23 * Double(cyclomaticComplexity)
+        let line = 16.2 * log(Double(lineOfCode))
+        let maitainabilityIndex = max(0, CGFloat(171 - halstead - cyclomatic - line) * 100 / 171)
+        print("maitainability index \(maitainabilityIndex)")
     } catch {
 
     }
 }
-
